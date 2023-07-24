@@ -1,0 +1,94 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define TABLE_SIZE 100
+// Structure for a dictionary word
+struct Word {
+char word[50];
+};
+// Structure for the hash table
+struct HashTable {
+struct Word* table[TABLE_SIZE];
+};
+// Function to create a new word
+struct Word* createWord(const char* word) {
+struct Word* newWord = (struct Word*)malloc(sizeof(struct Word));
+strcpy(newWord->word, word);
+return newWord;
+}
+// Function to create a new hash table
+struct HashTable* createHashTable() {
+struct HashTable* hashTable = (struct HashTable*)malloc(sizeof(struct HashTable));
+for (int i = 0; i < TABLE_SIZE; i++) {
+hashTable->table[i] = NULL;
+}
+return hashTable;
+}
+// Hash function
+int hash(const char* word) {
+int sum = 0;
+for (int i = 0; word[i] != '\0'; i++) {
+sum += word[i];
+}
+return sum % TABLE_SIZE;
+}
+// Function to insert a word into the hash table
+void insert(struct HashTable* hashTable, const char* word) {
+int index = hash(word);
+int startIndex = index;
+int step = 1;
+while (hashTable->table[index] != NULL) {
+if (strcmp(hashTable->table[index]->word, word) == 0) {
+printf("%s is already in the dictionary.\n", word);
+return;
+}
+index = (index + step * step) % TABLE_SIZE;
+step++;
+if (index == startIndex) {
+printf("Dictionary is full!\n");
+return;
+}
+}
+struct Word* newWord = createWord(word);
+hashTable->table[index] = newWord;
+}
+// Function to check if a word exists in the hash table
+void checkWord(struct HashTable* hashTable, const char* word) {
+int index = hash(word);
+int startIndex = index;
+int step = 1;
+while (hashTable->table[index] != NULL) {
+if (strcmp(hashTable->table[index]->word, word) == 0) {
+printf("%s is spelled correctly.\n", word);
+return;
+}
+index = (index + step * step) % TABLE_SIZE;
+step++;
+if (index == startIndex) {
+break;
+}
+}
+printf("%s is misspelled.\n", word);
+}
+// Main function
+int main() {
+struct HashTable* hashTable = createHashTable();
+int numWords;
+char word[50];
+printf("Enter the number of words in the dictionary: ");
+scanf("%d", &numWords);
+for (int i = 0; i < numWords; i++) {
+printf("Enter word %d: ", i + 1);
+scanf("%s", word);
+insert(hashTable, word);
+}
+int numQueries;
+printf("Enter the number of words to check: ");
+scanf("%d", &numQueries);
+for (int i = 0; i < numQueries; i++) {
+printf("Enter word %d to check: ", i + 1);
+scanf("%s", word);
+checkWord(hashTable, word);
+}
+return 0;
+}
